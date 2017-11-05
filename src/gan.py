@@ -128,13 +128,45 @@ class GAN:
                 print("Discriminator Eval Accuracy %f%%" % (total_accuracy * 100 / total_samples))
         saver.save(sess, path, step)
 
-        def leakyrelu*self, x):
+        def leakyrelu(self, x):
             return tf.maximum(0.01*x, x)
 
         def batch_norm(self, x):
             return tf.contrib.layers.batch_norm(x, decay=0.9, scale=True, is_training=self.is_training, updates_collections=None)
         
         def build_generator(self):
-            
+            with tf.variabe_scope('generator') as scope:
+
+                g_x = tf.placeholder(tf.float32, shape=[None, 32], name='input')
+
+                with tf.variable_scope("fc1"):
+                    g_w1 = tf.get_variable("g_w1", shape=[32, 1024], initializer=tf.contrib.layers.xavier_initializer())
+                    g_b1 = tf.get_variable("g_b1", initializer=tf.zeros([1024]))
+                    g_h1 = self.leakyrelu(self.batch_norm(tf.matmul(g_x, g_w1) + g_b1))
+                
+                with tf.variable_scope("fc2"):
+                    g_w2 = tf.get_variable("g_w2", shape=[1024, 7*7*64], initializer=tf.contrib.layers.xavier_initializer())
+                    g_b2 = tf.get_variable("g_b2", initializer=tf.zeros([7*7*64]))
+                    g_h2 = self.leakyrelu(self.batch_norm(tf.matmul(g_h1, g_w2) + g_b2))
+                    g_h2_reshaped = tf.reshape(g_h2, [-1, 7, 7, 64])
+
+                with tf.variable_scope("conv3"):
+                    g_w3 = tf.get_variable("g_w3", shape=[5, 5, 32, 64], initializer=tf.contrib.layers.xavier_initializer())
+                    g_b3 = tf.get_variable("g_b3", initializer=tf.contrib.layers.xavier_initializer())
+                    g_deconv3 = tf.nn.conv2d_transpose(g_h2_reshaped, g_w3, output_shape=[32, 14, 14, 32], strides=[1,2,2,1])
+                    g_h3 = self.leakyrelu(self.batch_norm(g_deconv3 + g_b3))
+                
+                with tf.variabe_scope("conv4"):
+                    g_w4 = tf.get_variable("g_w4", shape=[5,5,1,32], initializer=tf.contrib.layers.xavier_initializer())
+                    g_b4 = tf.get_variable("g_b4", initializer=tf.zeros([1]))
+                    g_deconv4 = tf.nn.conv2d_transpose(g_h32, g_w4, output_shape=[32, 28, 28, 1], strides=[1,2,2,1])
+                
+                g_y_logits = tf.reshape(g_deconv4 +g_b4, [-1, 784])
+                g_y = tf.nn.sigmoid(g_y_logits)
+        
+        def build_discriminator(self, x, keep_prob):
+
+                
+
 
 
