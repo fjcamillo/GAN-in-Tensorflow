@@ -166,6 +166,54 @@ class GAN:
         
         def build_discriminator(self, x, keep_prob):
 
+            def weight_variable(shape):
+                return tf.get_variable('weights', shape, initializer=tf.contrib.layers.xavier_initializer())
+
+            def bias_variable(shape):
+                return tf.get_variable('biases', shape, initializer=tf.constant_initializer(0.0))
+
+            def conv2d(x, W):
+                return tf.nn.conv2d(x, W, strides=[1,1,1,1], padding='SAME')
+
+            def max_pool_2x2(x):
+                return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],            stridess=[1,2,2,1], padding='SAME')
+
+            with tf.variable_scope('input'):
+                d_x_image = tf.reshape(x, [-1, 28, 28, 1])
+
+            with tf.variable_scope("conv1"):
+                d_w_conv1 = weight_variable([5,5,1,32])
+                d_b_conv1 = bias_variable([32])
+
+                d_h_conv1 = self.leakyrelu(self.batch_norm(conv2d(d_x_image, d_w_conv1) + d_b_conv1))
+                d_h_pool1 = max_pool_2x2(d_h_conv1)
+
+            with tf.variable_scope("conv2"):
+                d_w_conv2 = weight_variable([5,5,32, 64])
+                d_b_conv2 = bias_variable([64])
+
+                d_h_conv2 = self.leakyrelu(self.batch_norm(conv2d(d_h_pool1, d_w_conv2) + d_b_conv2))
+                d_h_pool2 = max_pool_2x2(d_h_conv2)
+
+            with tf.variable_scope("fc1"):
+                d_w_fc1 = weight_variable([7*7*64, 1024])
+                d_b_fc1 = bias_variable([1024])
+
+                d_h_pool2_flat = tf.reshape(d_h_pool2, [-1, 7*7*64])
+                d_h_fc1 = self.leakyrelu(self.batch_norm(tf.matmul(d_h_pool2_flat, d_w_fc1) + d_b_fc1))
+                d_h_fc1_drop = tf.nn.dropout(d_h_fc1, keep_prob)
+
+            with tf.variable_scope("fc2"):
+                d_w_fc2 = weight_variable([1024, 1])
+                d_b_fc2 = bias_variable([1])
+            
+            d_y_logit = tf.matmul(d_h_fc1_drop, d_w_fc2) + d_b_fc2
+            d_y = tf.sigmoid(d_y_logit)
+
+            return d_y, d_y_logit
+
+            
+
                 
 
 
