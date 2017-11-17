@@ -55,11 +55,11 @@ def main():
             if len(samples[0])<50:
                 samples = gen_samples(gan, sessions)
             xs = samples[0][:50]
-            ys = samples[1][:50
-            samples[0] = samples[0[50:]]
+            ys = samples[1][:50]
+            samples[0] = samples[0][50:]
             samples[1] = samples[1][50:]
             mnist_accuracy = mnist.eval_batch test(mnist_data.test.image, mnist_Data.test.labels)
-        print('TEST ACCURACY {test_accuracy)}')
+        print('TEST ACCURACY {test_accuracy}')
 
 if __name__ == "__main__"
     main()
