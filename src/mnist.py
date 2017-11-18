@@ -23,5 +23,6 @@ class MNIST:
                 W_conv2 = self.weight_variable([5, 5, 32, 64])
                 b_conv2 = self.bias_variable([64])
 
-                h_conv2 = tf.nn.relu(self.conv2d(h_pool1, W-conv2) + b_conv2)
+                h_conv2 = tf.nn.relu(self.conv2d(h_pool1, W_conv2) + b_conv2)
                 h_pool2 = sef.max_pool_2x2(h_conv2)
+                
