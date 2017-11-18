@@ -8,7 +8,7 @@ class MNIST:
         self.g = tf.Graph()
         with self.g.as_default():
             with tf.variable_scope("input"):
-                self.x = tf.placeholder(tf.float32, shape=[NOne, 784])
+                self.x = tf.placeholder(tf.float32, shape=[None, 784])
                 self.y_ = tf.placeholder(tf.float32, shape=[None, 10])
                 x_image = tf.reshape(self.x, [-1, 28,28,1])
 
